@@ -1,0 +1,140 @@
+package JExcel;
+
+import java.io.File;
+import java.io.FileOutputStream;
+import java.util.Calendar;
+import main.Arquivo;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.DateUtil;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+
+public class JExcel {
+
+    public static boolean saveWorkbookAs(File saveFile, Workbook workbook) {
+        try {
+            if (!saveFile.isDirectory()) {
+                //Cria novo arquivo editado
+                FileOutputStream outFile = new FileOutputStream(saveFile.getAbsolutePath());
+                workbook.write(outFile);
+                outFile.close();
+                return true;
+            } else {
+                throw new Exception("Para salvar o workbook, o file passado deve ser um arquivo!");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+
+    }
+
+    public static boolean saveSheetAsCsv(File newFile, File arquivoExcelOriginal, Sheet sheet) {
+        try {
+            String textCSV = JExcel.sheetToCSV(sheet);
+            return Arquivo.salvar(newFile.getAbsolutePath(), textCSV);
+        } catch (Exception e) {
+            return false;
+        }
+
+    }
+
+    public static String sheetToCSV(Sheet sheet) {
+        StringBuilder builder = new StringBuilder();
+
+        try {
+            Row row = null;
+            for (int i = 0; i <= sheet.getLastRowNum(); i++) {
+                try {
+                    row = sheet.getRow(i);
+                    short lastCol = row.getLastCellNum();
+                    lastCol--;
+
+                    for (int j = 0; j <= lastCol; j++) {
+                        builder.append(row.getCell(j) + (j != lastCol ? ";" : ""));
+                    }
+                    if (i != sheet.getLastRowNum()) {
+                        builder.append("\r\n");
+                    }
+                } catch (Exception e) {
+                }
+            }
+        } catch (Exception e) {
+            System.out.println("Erro ao converter Sheet para CSV: " + e);
+            e.printStackTrace();
+        }
+
+        return builder.toString();
+    }
+
+    public static String getStringCell(Cell cel) {
+        try {
+            String tipo = cel.getCellType().name();
+
+            switch (tipo) {
+                case "STRING":
+                    return cel.getStringCellValue();
+                case "NUMERIC":
+                    return String.valueOf(cel.getNumericCellValue()).replaceAll("\\.", ",");
+                default:
+                    return "";
+            }
+        } catch (Exception e) {
+            return "";
+        }
+
+    }
+
+    public static String getStringDate(int daysAfter1900) {
+        Calendar cal = Calendar.getInstance();
+        cal.set(1900, 0, 1);
+        cal.add(Calendar.DAY_OF_MONTH, (daysAfter1900 - 2));
+
+        return cal.get(Calendar.DAY_OF_MONTH) + "/" + (cal.get(Calendar.MONTH) + 1) + "/" + (cal.get(Calendar.YEAR));
+    }
+
+    public static void removeRows(Sheet sheet, int firstRow, int lastRow) {
+        try {
+            for (int i = lastRow; i >= firstRow; i--) {
+                if (i <= sheet.getLastRowNum()) {
+                    Row row = sheet.getRow(i);
+                    // sheet.removeRow(row);    NO NEED FOR THIS LINE
+                    sheet.shiftRows(row.getRowNum() + 1, sheet.getLastRowNum() + 1, -1);
+                } else if (sheet.getLastRowNum() >= firstRow) {
+                    i = sheet.getLastRowNum() + 1;
+                }
+            }
+        } catch (Exception e) {
+        }
+    }
+
+    public static int Cell(String letter) {
+        int start = 97;
+        int end = 122;
+
+        String collumStr = letter.toLowerCase();
+        try {
+            int charAt0 = collumStr.charAt(0);
+            if (charAt0 >= start && charAt0 <= end) {
+                return charAt0 - start;
+            } else {
+                return 0;
+            }
+        } catch (Exception e) {
+            return 0;
+        }
+    }
+
+    public static boolean isDateCell(Cell cell) {
+        try {
+            if (DateUtil.isCellDateFormatted(cell)) {
+                return true;
+            } else {
+                return false;
+            }
+        } catch (Exception e) {
+            return false;
+        }
+    }
+}
