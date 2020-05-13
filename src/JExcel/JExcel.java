@@ -4,7 +4,9 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.util.Calendar;
 import main.Arquivo;
+import org.apache.poi.ss.usermodel.BorderStyle;
 import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.DateUtil;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -136,5 +138,12 @@ public class JExcel {
         } catch (Exception e) {
             return false;
         }
+    }
+    
+    private void setCellBorders(CellStyle style) {
+        style.setBorderTop(BorderStyle.THIN);
+        style.setBorderLeft(BorderStyle.THIN);
+        style.setBorderRight(BorderStyle.THIN);
+        style.setBorderBottom(BorderStyle.THIN);
     }
 }
