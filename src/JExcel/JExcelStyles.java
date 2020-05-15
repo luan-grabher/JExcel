@@ -6,21 +6,21 @@ import org.apache.poi.xssf.usermodel.XSSFSheet;
 
 public class JExcelStyles {
 
-    private static void setCellBorders(CellStyle style) {
+    public static void setCellBorders(CellStyle style) {
         style.setBorderTop(BorderStyle.THIN);
         style.setBorderLeft(BorderStyle.THIN);
         style.setBorderRight(BorderStyle.THIN);
         style.setBorderBottom(BorderStyle.THIN);
     }
 
-    private static void removeCellBorders(CellStyle style) {
+    public static void removeCellBorders(CellStyle style) {
         style.setBorderTop(BorderStyle.NONE);
         style.setBorderLeft(BorderStyle.NONE);
         style.setBorderRight(BorderStyle.NONE);
         style.setBorderBottom(BorderStyle.NONE);
     }
 
-    private static void setStylesInRange(XSSFSheet sheet, CellStyle estilo,
+    public static void setStylesInRange(XSSFSheet sheet, CellStyle estilo,
             int primeira_linha, int ultima_linha,
             int primeira_coluna, int ultima_coluna) {
         for (int linha = primeira_linha; linha <= ultima_linha; linha++) {
