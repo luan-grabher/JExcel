@@ -37,6 +37,7 @@ public class JExcel {
             String textCSV = JExcel.sheetToCSV(sheet);
             return FileManager.save(newFile.getAbsolutePath(), textCSV);
         } catch (Exception e) {
+            e.printStackTrace();
             return false;
         }
 
@@ -83,6 +84,7 @@ public class JExcel {
                     return "";
             }
         } catch (Exception e) {
+            e.printStackTrace();
             return "";
         }
 
@@ -108,6 +110,7 @@ public class JExcel {
                 }
             }
         } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 
@@ -140,7 +143,7 @@ public class JExcel {
         }
     }
     
-    private void setCellBorders(CellStyle style) {
+    public void setCellBorders(CellStyle style) {
         style.setBorderTop(BorderStyle.THIN);
         style.setBorderLeft(BorderStyle.THIN);
         style.setBorderRight(BorderStyle.THIN);
