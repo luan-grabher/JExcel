@@ -1,9 +1,9 @@
 package JExcel;
 
+import fileManager.FileManager;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.util.Calendar;
-import main.Arquivo;
 import org.apache.poi.ss.usermodel.BorderStyle;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
@@ -35,7 +35,7 @@ public class JExcel {
     public static boolean saveSheetAsCsv(File newFile, File arquivoExcelOriginal, Sheet sheet) {
         try {
             String textCSV = JExcel.sheetToCSV(sheet);
-            return Arquivo.salvar(newFile.getAbsolutePath(), textCSV);
+            return FileManager.save(newFile.getAbsolutePath(), textCSV);
         } catch (Exception e) {
             return false;
         }
