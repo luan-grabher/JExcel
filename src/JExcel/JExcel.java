@@ -73,15 +73,19 @@ public class JExcel {
 
     public static String getStringCell(Cell cel) {
         try {
-            String tipo = cel.getCellType().name();
+            if(cel != null){
+                String tipo = cel.getCellType().name();
 
-            switch (tipo) {
-                case "STRING":
-                    return cel.getStringCellValue();
-                case "NUMERIC":
-                    return String.valueOf(cel.getNumericCellValue()).replaceAll("\\.", ",");
-                default:
-                    return "";
+                switch (tipo) {
+                    case "STRING":
+                        return cel.getStringCellValue();
+                    case "NUMERIC":
+                        return String.valueOf(cel.getNumericCellValue());
+                    default:
+                        return "";
+                }
+            }else{
+                throw new Exception("Célula inexistente ou sem nada");
             }
         } catch (Exception e) {
             e.printStackTrace();
