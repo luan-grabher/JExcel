@@ -3,10 +3,12 @@ package JExcel;
 import fileManager.FileManager;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.math.BigDecimal;
 import java.util.Calendar;
 import org.apache.poi.ss.usermodel.BorderStyle;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.DateUtil;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -92,6 +94,28 @@ public class JExcel {
             return "";
         }
 
+    }
+    
+        /**
+     * Pega a String da célula
+     * @param cel
+     * @return String da célula
+     */
+    public static String getCellString(Cell cel) {
+        try {
+            CellType type = cel.getCellType();
+
+            switch (type.name()) {
+                case "STRING":
+                    return cel.getStringCellValue();
+                case "NUMERIC":
+                    return String.valueOf(new BigDecimal(cel.getNumericCellValue()).toPlainString());
+                default:
+                    return "";
+            }
+        } catch (Exception e) {
+            return "";
+        }
     }
 
     public static String getStringDate(int daysAfter1900) {
