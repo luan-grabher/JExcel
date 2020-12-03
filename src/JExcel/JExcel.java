@@ -177,4 +177,32 @@ public class JExcel {
         style.setBorderRight(BorderStyle.THIN);
         style.setBorderBottom(BorderStyle.THIN);
     }
+    
+    
+    /**
+     * Pega bigdecimal de uma celula do excel numerica
+     * 
+     * @param cell CElula que ira pegar numero
+     * @param forceNegative Se deve multiplicar por -1 o numero se for positivo
+     * @return celula em número BigDecimal
+     */
+    private BigDecimal getBigDecimalFromCell(Cell cell, boolean forceNegative) {
+        //Pega texto das celulas
+        String valueString = cell != null ? JExcel.getStringCell(cell) : "0.00";
+        valueString = valueString.replaceAll("[^0-9\\.,-]", "");
+
+        //Se tiver . antes da virgula remove os pontos e coloca ponto no lugar da virgula
+        if (valueString.indexOf(".") < valueString.indexOf(",")) {
+            valueString = valueString.replaceAll("\\.", "").replaceAll("\\,", ".");
+        }
+
+        BigDecimal valueBigDecimal = new BigDecimal(valueString.equals("") ? "0" : valueString);
+
+        //Se a coluna tiver que multiplicar por -1 e o valor encontrado for maior que zero
+        if (forceNegative && valueBigDecimal.compareTo(BigDecimal.ZERO) > 0) {
+            valueBigDecimal = valueBigDecimal.multiply(new BigDecimal("-1"));
+        }
+        
+        return valueBigDecimal;
+    }
 }
