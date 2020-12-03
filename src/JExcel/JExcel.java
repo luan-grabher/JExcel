@@ -186,7 +186,7 @@ public class JExcel {
      * @param forceNegative Se deve multiplicar por -1 o numero se for positivo
      * @return celula em número BigDecimal
      */
-    private BigDecimal getBigDecimalFromCell(Cell cell, boolean forceNegative) {
+    public static BigDecimal getBigDecimalFromCell(Cell cell, boolean forceNegative) {
         //Pega texto das celulas
         String valueString = cell != null ? JExcel.getStringCell(cell) : "0.00";
         valueString = valueString.replaceAll("[^0-9\\.,-]", "");
