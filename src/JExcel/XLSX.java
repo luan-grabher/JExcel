@@ -15,10 +15,6 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 public class XLSX {
 
-    File arquivo;
-    XSSFWorkbook wk;
-    XSSFSheet sheet;
-
     /**
      * Retorna uma lista das linhas de um arquivo xlsx com um mapa com o valores
      * das colunas de cada linha conforme as configurações definidas.
@@ -54,11 +50,25 @@ public class XLSX {
     public static List<Map<String, Object>> get(File file, Map<String, Map<String, String>> config) {
         List<Map<String, Object>> rows = new ArrayList<>();
 
+        try {
+            XSSFWorkbook wk;
+            XSSFSheet sheet;
+
+            wk = new XSSFWorkbook(file);
+            sheet = wk.getSheetAt(0);
+            
+            for (Row row : sheet) {
+                //Pega colunas
+            }
+        } catch (Exception e) {
+        }
         return rows;
     }
 
     /**
      * Retorna o objeto String/BigDecimal/Calendar conforme configuração
+     *
+     *
      */
     private static Object getCollumnVal(Row row, Map<String, String> colConfig) {
 
@@ -72,7 +82,7 @@ public class XLSX {
                     //Aplica replace se tiver replace e nao estiver em branco
                     if (colConfig.containsKey("replace") && !colConfig.get("replace").equals("")) {
                         String[] replaces = colConfig.get("replace").split("§");
-                        if(replaces.length == 2){
+                        if (replaces.length == 2) {
                             stringVal = stringVal.replaceAll(replaces[0], replaces[1]);
                         }
                     }
@@ -88,7 +98,7 @@ public class XLSX {
                             return stringVal;
                         } else if (type.equals("value")) {
                             return new BigDecimal(stringVal);
-                        } else if (type.equals("date") && colConfig.containsKey("dateFormat")){
+                        } else if (type.equals("date") && colConfig.containsKey("dateFormat")) {
                             return Dates.Dates.getCalendarFromFormat(stringVal, colConfig.get("dateFormat"));
                         }
                     }
