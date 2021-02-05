@@ -19,9 +19,9 @@ public class testmain {
         Map<String, String> data = new HashMap<>();
         data.put("name", "data");
         data.put("collumn", "B");
-        data.put("type", "date");
-        data.put("collumn", "B");
+        data.put("type", "string");
         data.put("required", "true");
+        data.put("unifyDown", "D");
         
         config.put("data", data);
         
@@ -30,7 +30,8 @@ public class testmain {
         
         rows.forEach((row) ->{
             System.out.println(
-                    Dates.Dates.getCalendarInThisStringFormat((Calendar) row.get("data"), "dd/MM/yyyy")
+                    row.get("data").toString()
+                    //Dates.Dates.getCalendarInThisStringFormat((Calendar) row.get("data"), "dd/MM/yyyy")
             );
         });
     }

@@ -66,7 +66,7 @@ public class XLSX {
                     if (col.getOrDefault("type", "string").equals("string")
                             && !col.getOrDefault("unifyDown", "").equals("")) {
                         //Pega o valor da proxima linha
-                        Object nextRowCol = getCollumnVal(sheet.getRow(row.getRowNum() + 1), col);
+                        Object nextRowCol = getNextCollumnVal(sheet.getRow(row.getRowNum() + 1), col);
                         //Se pelo menos um valor não for null
                         if (colObj != null || nextRowCol != null) {
                             //Tansforma os valores null em "" e junta os dois no colObj
@@ -107,9 +107,30 @@ public class XLSX {
      * @param colConfig Configuração da coluna
      */
     private static Object getCollumnVal(Row row, Map<String, String> colConfig) {
+        return getCollumnVal(row, colConfig, "collumn");
+    }
+
+    /**
+     * Retorna o objeto String/BigDecimal/Calendar conforme configuração
+     *
+     * @param row Linha da sheet
+     * @param colConfig Configuração da coluna
+     */
+    private static Object getNextCollumnVal(Row row, Map<String, String> colConfig) {
+        return getCollumnVal(row, colConfig, "unifyDown");
+    }
+
+    /**
+     * Retorna o objeto String/BigDecimal/Calendar conforme configuração
+     *
+     * @param row Linha da sheet
+     * @param colConfig Configuração da coluna
+     * @param nameMapCollumns nome do vetor que tem as colunas
+     */
+    private static Object getCollumnVal(Row row, Map<String, String> colConfig, String nameMapCollumns) {
 
         try {
-            String stringVal = getStringOfCols(row, colConfig.getOrDefault("collumn", "").split("§"));
+            String stringVal = getStringOfCols(row, colConfig.getOrDefault(nameMapCollumns, "").split("§"));
             if (!stringVal.equals("")) {
                 //Converte data se for tipo data e estiver no formato de numero
                 if (colConfig.getOrDefault("type", "string").equals("date")
