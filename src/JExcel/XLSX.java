@@ -1,6 +1,5 @@
 package JExcel;
 
-import JExcel.JExcel;
 import java.io.File;
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -17,34 +16,26 @@ public class XLSX {
     /**
      * Retorna uma lista das linhas de um arquivo xlsx com um mapa com o valores
      * das colunas de cada linha conforme as configurações definidas.
-     *
+     * <p>
      * Configurações de cada coluna:
-     *
+     * <p>
      * Para colunas Booleanas - utilizar 'true' para verdadeiro e qualquer outra
      * coisa, inclusive null, para false
-     *
-     * -name
-     *
+     * <br>
+     * -name<br>
      * -collumn: Caso tenha que unir colunas, separe por §. Caso o que estiver
      * entre os § for um caractere somente, será pego o valor da coluna, se não
-     * será adicionado a palavra escrita no resultado.
-     *
-     * -regex: Filtro Regex
-     *
+     * será adicionado a palavra escrita no resultado.<br>
+     * -regex: Filtro Regex<br>
      * -replace: Separa o regex do replace com § por exemplo "aa§bb" para
-     * substituir todos "aa" por "bb"
-     *
-     * -type:Tipo de Objeto: string,value,date
-     *
-     * -dateFormat:Formato da data: Se tiver data dd/MM/yyyy (BR)
-     *
+     * substituir todos "aa" por "bb"<br>
+     * -type:Tipo de Objeto: string,value,date<br>
+     * -dateFormat:Formato da data: Se tiver data dd/MM/yyyy (BR)<br>
      * -required: Se é Obrigatoria ou não, se for obrigatória e não tiver valor
-     * ou nao for válida, não pega a linha
-     *
-     * -requiredBlank: Tem que estar em branco: bool
-     *
+     * ou nao for válida, não pega a linha<br>
+     * -requiredBlank: Tem que estar em branco: bool<br>
      * -unifyDown: UnirColunaAbaixo: Coluna(s) em baixo que vai ser unida no
-     * resultado. Para não tiizar deixe em branco ou não declare.
+     * resultado. Para não tiizar deixe em branco ou não declare.<br>
      *
      * @param file Arquivo XLSX
      * @param config Configuração das colunas em mapa
@@ -121,12 +112,12 @@ public class XLSX {
             String stringVal = getStringOfCols(row, colConfig.getOrDefault("collumn", "").split("§"));
             if (!stringVal.equals("")) {
                 //Converte data se for tipo data e estiver no formato de numero
-                if(colConfig.getOrDefault("type", "string").equals("date") 
-                        && stringVal.matches("[0-9]+[.][0-9]+")){
+                if (colConfig.getOrDefault("type", "string").equals("date")
+                        && stringVal.matches("[0-9]+[.][0-9]+")) {
                     Integer dateInt = Integer.valueOf(stringVal.split("\\.")[0]);
                     stringVal = JExcel.getStringDate(dateInt);
                 }
-                
+
                 //Aplica replace se tiver replace e nao estiver em branco
                 if (!colConfig.getOrDefault("replace", "").equals("")) {
                     String[] replaces = colConfig.get("replace").split("§");
@@ -172,10 +163,10 @@ public class XLSX {
 
         for (String col : cols) {
             if (col.length() == 1 || (col.length() == 2 && col.startsWith("-"))) {
-                if(col.length() == 2 && col.startsWith("-")){
+                if (col.length() == 2 && col.startsWith("-")) {
                     col = col.replaceAll("-", "");
                 }
-                
+
                 Cell cel = row.getCell(JExcel.Cell(col));
                 if (cel != null) {
                     result.append(JExcel.getStringCell(cel));

@@ -25,7 +25,6 @@ public class testmain {
         
         config.put("data", data);
         
-
         File file = new File("C:\\Users\\Admnistrador\\Desktop\\teste.xlsx");
         List<Map<String, Object>> rows = XLSX.get(file, config);
         
