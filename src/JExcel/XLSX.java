@@ -109,10 +109,6 @@ public class XLSX {
         return null;
     }
 
-    public XLSX(File arquivo) {
-        this.arquivo = arquivo;
-    }
-
     /**
      * Adiciona os lançamentos do arquivo Excel com base nas colunas passadas.
      *
@@ -124,7 +120,7 @@ public class XLSX {
      * @param colunasHistorico
      * @param colunaSaida
      */
-    public void setLctos(String colunaData, String colunaDoc, String colunaPreTexto, String colunasHistorico, String colunaEntrada, String colunaSaida, String colunaValor) {
+    /*public void setLctos(String colunaData, String colunaDoc, String colunaPreTexto, String colunasHistorico, String colunaEntrada, String colunaSaida, String colunaValor) {
         try {
             System.out.println("Definindo workbook de " + arquivo.getName());
             wk = new XSSFWorkbook(arquivo);
@@ -137,7 +133,7 @@ public class XLSX {
         } catch (Exception e) {
             e.printStackTrace();
         }
-    }
+    }*/
 
     /**
      * Adiciona os lançamentos do arquivo Excel com base nas colunas passadas. A
