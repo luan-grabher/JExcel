@@ -65,33 +65,36 @@ public class XLSX {
 
                 //Percorre todas colunas das configurações
                 config.forEach((name, col) -> {
-                    //Pega o objeto da coluna
-                    Object colObj = getCollumnVal(row, col);
+                    if (col != null) {
 
-                    //Se for tipo string e tiver que juntar com a proxima linha
-                    if (col.getOrDefault("type", "string").equals("string")
-                            && !col.getOrDefault("unifyDown", "").equals("")) {
-                        //Pega o valor da proxima linha
-                        Object nextRowCol = getNextCollumnVal(sheet.getRow(row.getRowNum() + 1), col);
-                        //Se pelo menos um valor não for null
-                        if (colObj != null || nextRowCol != null) {
-                            //Tansforma os valores null em "" e junta os dois no colObj
-                            colObj = (String) (colObj == null ? "" : colObj.toString());
-                            colObj += (String) (colObj.toString().equals("") ? "" : " " + (nextRowCol == null ? "" : nextRowCol.toString()));
+                        //Pega o objeto da coluna
+                        Object colObj = getCollumnVal(row, col);
+
+                        //Se for tipo string e tiver que juntar com a proxima linha
+                        if (col.getOrDefault("type", "string").equals("string")
+                                && !col.getOrDefault("unifyDown", "").equals("")) {
+                            //Pega o valor da proxima linha
+                            Object nextRowCol = getNextCollumnVal(sheet.getRow(row.getRowNum() + 1), col);
+                            //Se pelo menos um valor não for null
+                            if (colObj != null || nextRowCol != null) {
+                                //Tansforma os valores null em "" e junta os dois no colObj
+                                colObj = (String) (colObj == null ? "" : colObj.toString());
+                                colObj += (String) (colObj.toString().equals("") ? "" : " " + (nextRowCol == null ? "" : nextRowCol.toString()));
+                            }
                         }
-                    }
 
-                    //Se for required e não for null OU se não for required
-                    if (Boolean.valueOf(col.get("required")).equals(Boolean.TRUE)
-                            && (colObj == null || colObj.equals(""))) {
-                        rowValid[0] = false;
-                    } else {
-                        //Se não tiver que ser em branco o tiver que ser em branco e o objeto for null ou
-                        if (Boolean.valueOf(col.get("requiredBlank")).equals(Boolean.TRUE)
-                                && colObj != null && !colObj.equals("")) {
+                        //Se for required e não for null OU se não for required
+                        if (Boolean.valueOf(col.get("required")).equals(Boolean.TRUE)
+                                && (colObj == null || colObj.equals(""))) {
                             rowValid[0] = false;
                         } else {
-                            cols.put(name, colObj);
+                            //Se não tiver que ser em branco o tiver que ser em branco e o objeto for null ou
+                            if (Boolean.valueOf(col.get("requiredBlank")).equals(Boolean.TRUE)
+                                    && colObj != null && !colObj.equals("")) {
+                                rowValid[0] = false;
+                            } else {
+                                cols.put(name, colObj);
+                            }
                         }
                     }
                 });
@@ -136,7 +139,7 @@ public class XLSX {
      */
     private static Object getCollumnVal(Row row, Map<String, String> colConfig, String nameMapCollumns) {
 
-        try {            
+        try {
             String stringVal = getStringOfCols(row, colConfig.getOrDefault(nameMapCollumns, "").split("§"));
             if (!stringVal.equals("")) {
                 //Converte data se for tipo data e estiver no formato de numero
@@ -146,8 +149,8 @@ public class XLSX {
                     stringVal = JExcel.getStringDate(dateInt);
                 } else if (colConfig.getOrDefault("type", "string").equals("value")
                         && !stringVal.equals("")
-                        && !colConfig.getOrDefault("forceNegativeIf","").equals("")) {
-                    if(stringVal.matches(colConfig.get("forceNegativeIf"))){
+                        && !colConfig.getOrDefault("forceNegativeIf", "").equals("")) {
+                    if (stringVal.matches(colConfig.get("forceNegativeIf"))) {
                         stringVal = "-" + stringVal;
                     }
                 }
