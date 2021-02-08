@@ -42,7 +42,7 @@ public class testmain {
         valor.put("required", "true");
         valor.put("regex", "[-]?[0-9,.]+");
         valor.put("replace", "[^0-9,-]+§");
-        valor.put("forceNegativeIf", "(?i).*?.D*?");
+        valor.put("forceNegativeIf", "(?i).*?.[D]*?");
         
         
         
