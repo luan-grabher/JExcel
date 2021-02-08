@@ -71,8 +71,8 @@ public class XLSX {
                         Object colObj = getCollumnVal(row, col);
 
                         //Se for tipo string e tiver que juntar com a proxima linha
-                        if (col.getOrDefault("type", "string").equals("string")
-                                && !col.getOrDefault("unifyDown", "").equals("")) {
+                        if ("string".equals(col.getOrDefault("type", "string"))
+                                && !"".equals(col.getOrDefault("unifyDown", ""))) {
                             //Pega o valor da proxima linha
                             Object nextRowCol = getNextCollumnVal(sheet.getRow(row.getRowNum() + 1), col);
                             //Se pelo menos um valor não for null
@@ -84,12 +84,12 @@ public class XLSX {
                         }
 
                         //Se for required e não for null OU se não for required
-                        if (Boolean.valueOf(col.get("required")).equals(Boolean.TRUE)
+                        if (Boolean.TRUE.equals(Boolean.valueOf(col.get("required")))
                                 && (colObj == null || colObj.equals(""))) {
                             rowValid[0] = false;
                         } else {
                             //Se não tiver que ser em branco o tiver que ser em branco e o objeto for null ou
-                            if (Boolean.valueOf(col.get("requiredBlank")).equals(Boolean.TRUE)
+                            if (Boolean.TRUE.equals(Boolean.valueOf(col.get("requiredBlank")))
                                     && colObj != null && !colObj.equals("")) {
                                 rowValid[0] = false;
                             } else {
@@ -143,20 +143,20 @@ public class XLSX {
             String stringVal = getStringOfCols(row, colConfig.getOrDefault(nameMapCollumns, "").split("§"));
             if (!stringVal.equals("")) {
                 //Converte data se for tipo data e estiver no formato de numero
-                if (colConfig.getOrDefault("type", "string").equals("date")
+                if ("date".equals(colConfig.getOrDefault("type", "string"))
                         && stringVal.matches("[0-9]+[.][0-9]+")) {
                     Integer dateInt = Integer.valueOf(stringVal.split("\\.")[0]);
                     stringVal = JExcel.getStringDate(dateInt);
-                } else if (colConfig.getOrDefault("type", "string").equals("value")
+                } else if ("value".equals(colConfig.getOrDefault("type", "string"))
                         && !stringVal.equals("")
-                        && !colConfig.getOrDefault("forceNegativeIf", "").equals("")) {
+                        && !"".equals(colConfig.getOrDefault("forceNegativeIf", ""))) {
                     if (stringVal.matches(colConfig.get("forceNegativeIf"))) {
                         stringVal = "-" + stringVal;
                     }
                 }
 
                 //Aplica replace se tiver replace e nao estiver em branco
-                if (!colConfig.getOrDefault("replace", "").equals("")) {
+                if (!"".equals(colConfig.getOrDefault("replace", ""))) {
                     String[] replaces = colConfig.get("replace").split("§", -1);
                     if (replaces.length == 2) {
                         stringVal = stringVal.replaceAll(replaces[0], replaces[1]);
@@ -164,8 +164,8 @@ public class XLSX {
                 }
 
                 //Continua se nao tiver filtro de regex ou for match do regex
-                if (colConfig.getOrDefault("regex", "").equals("")
-                        || (!colConfig.getOrDefault("regex", "").equals("")
+                if ("".equals(colConfig.getOrDefault("regex", ""))
+                        || (!"".equals(colConfig.getOrDefault("regex", ""))
                         && stringVal.matches(colConfig.get("regex")))) {
                     String type = colConfig.getOrDefault("type", "string");
                     switch (type) {
