@@ -57,6 +57,13 @@ public class XLSX {
 
             wk = new XSSFWorkbook(file);
             sheet = wk.getSheetAt(0);
+            
+            //Remove todas config NULL
+            while (config.values().remove(null));
+            config.forEach((n, c)->{
+                //Remove todas colunas NULL
+                while (c.values().remove(null));
+            });            
 
             for (Row row : sheet) {
                 //Cria mapa de colunas
