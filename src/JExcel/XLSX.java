@@ -18,7 +18,7 @@ public class XLSX {
      * das colunas de cada linha conforme as configurações definidas.
      * <p>
      * Para procurar um regex no meio de algo e ignorar case:
-     * "(?i).*?" + search + ".*?"<br>
+     * "(?i).*" + search + ".*"<br>
      * <p>
      * Configurações de cada coluna:
      * <p>
@@ -136,7 +136,7 @@ public class XLSX {
      */
     private static Object getCollumnVal(Row row, Map<String, String> colConfig, String nameMapCollumns) {
 
-        try {
+        try {            
             String stringVal = getStringOfCols(row, colConfig.getOrDefault(nameMapCollumns, "").split("§"));
             if (!stringVal.equals("")) {
                 //Converte data se for tipo data e estiver no formato de numero

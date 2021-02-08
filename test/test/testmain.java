@@ -2,6 +2,7 @@ package test;
 
 import JExcel.XLSX;
 import java.io.File;
+import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -42,7 +43,7 @@ public class testmain {
         valor.put("required", "true");
         valor.put("regex", "[-]?[0-9,.]+");
         valor.put("replace", "[^0-9,-]+§");
-        valor.put("forceNegativeIf", "(?i).*?.[D]*?");
+        valor.put("forceNegativeIf", "(?i).*[D].*");
         
         
         
@@ -54,12 +55,14 @@ public class testmain {
         File file = new File("D:\\Downloads\\teste.xlsx");
         List<Map<String, Object>> rows = XLSX.get(file, config);
         
+        
+        BigDecimal[] total = new BigDecimal[]{new BigDecimal("0.00")};
+        
         rows.forEach((row) ->{
-            System.out.println(
-                    row.get("data").toString()
-                    //Dates.Dates.getCalendarInThisStringFormat((Calendar) row.get("data"), "dd/MM/yyyy")
-            );
+            total[0] = total[0].add((BigDecimal) row.get("valor"));
         });
+        
+        System.out.println(total[0].toPlainString());
     }
 
 }
