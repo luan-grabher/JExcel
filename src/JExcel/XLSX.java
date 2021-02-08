@@ -17,6 +17,9 @@ public class XLSX {
      * Retorna uma lista das linhas de um arquivo xlsx com um mapa com o valores
      * das colunas de cada linha conforme as configurações definidas.
      * <p>
+     * Para procurar um regex no meio de algo e ignorar case:
+     * "(?i).*?" + search + ".*?"<br>
+     * <p>
      * Configurações de cada coluna:
      * <p>
      * Para colunas Booleanas - utilizar 'true' para verdadeiro e qualquer outra
@@ -26,7 +29,8 @@ public class XLSX {
      * -collumn: Caso tenha que unir colunas, separe por §. Caso o que estiver
      * entre os § for um caractere somente, será pego o valor da coluna, se não
      * será adicionado a palavra escrita no resultado.<br>
-     * -regex: Filtro Regex<br>
+     * -regex: Se após converter a data e fazer os replaces não for match do
+     * regex, não pega<br>
      * -replace: Separa o regex do replace com § por exemplo "aa§bb" para
      * substituir todos "aa" por "bb"<br>
      * -type:Tipo de Objeto: string,value,date<br>
@@ -36,6 +40,8 @@ public class XLSX {
      * -requiredBlank: Tem que estar em branco: bool<br>
      * -unifyDown: UnirColunaAbaixo: Coluna(s) em baixo que vai ser unida no
      * resultado. Para não tiizar deixe em branco ou não declare.<br>
+     * -forceNegativeIf: Coloca um "-" na frente se o tipo for valor e se
+     * possuir o regex. Utilize regex. <br>
      *
      * @param file Arquivo XLSX
      * @param config Configuração das colunas em mapa
@@ -70,7 +76,8 @@ public class XLSX {
                         //Se pelo menos um valor não for null
                         if (colObj != null || nextRowCol != null) {
                             //Tansforma os valores null em "" e junta os dois no colObj
-                            colObj = (String) (colObj == null ? "" : colObj.toString()) + (nextRowCol == null ? "" : nextRowCol.toString());
+                            colObj = (String) (colObj == null ? "" : colObj.toString());
+                            colObj += (String) (colObj.toString().equals("") ? "" : " " + (nextRowCol == null ? "" : nextRowCol.toString()));
                         }
                     }
 
@@ -137,11 +144,17 @@ public class XLSX {
                         && stringVal.matches("[0-9]+[.][0-9]+")) {
                     Integer dateInt = Integer.valueOf(stringVal.split("\\.")[0]);
                     stringVal = JExcel.getStringDate(dateInt);
+                } else if (colConfig.getOrDefault("type", "string").equals("value")
+                        && !stringVal.equals("")
+                        && !colConfig.getOrDefault("forceNegativeIf","").equals("")) {
+                    if(stringVal.matches(colConfig.get("forceNegativeIf"))){
+                        stringVal = "-" + stringVal;
+                    }
                 }
 
                 //Aplica replace se tiver replace e nao estiver em branco
                 if (!colConfig.getOrDefault("replace", "").equals("")) {
-                    String[] replaces = colConfig.get("replace").split("§");
+                    String[] replaces = colConfig.get("replace").split("§", -1);
                     if (replaces.length == 2) {
                         stringVal = stringVal.replaceAll(replaces[0], replaces[1]);
                     }
@@ -158,7 +171,6 @@ public class XLSX {
                             return stringVal;
                         case "value":
                             Boolean forceNegative = colConfig.get("collumn").startsWith("-");
-
                             return getBigDecimalFromCell(stringVal, forceNegative);
                         case "date":
                             return Dates.Dates.getCalendarFromFormat(stringVal, colConfig.getOrDefault("dateFormat", "dd/MM/yyyy"));
@@ -190,9 +202,15 @@ public class XLSX {
 
                 Cell cel = row.getCell(JExcel.Cell(col));
                 if (cel != null) {
+                    if (!result.toString().equals("")) {
+                        result.append(" ");
+                    }
                     result.append(JExcel.getStringCell(cel));
                 }
             } else if (col.length() > 1) {
+                if (!result.toString().equals("")) {
+                    result.append(" ");
+                }
                 result.append(col);
             }
         }
