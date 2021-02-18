@@ -1,5 +1,6 @@
 package JExcel;
 
+import fileManager.Args;
 import java.io.File;
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -57,13 +58,13 @@ public class XLSX {
 
             wk = new XSSFWorkbook(file);
             sheet = wk.getSheetAt(0);
-            
+
             //Remove todas config NULL
             while (config.values().remove(null));
-            config.forEach((n, c)->{
+            config.forEach((n, c) -> {
                 //Remove todas colunas NULL
                 while (c.values().remove(null));
-            });            
+            });
 
             for (Row row : sheet) {
                 //Cria mapa de colunas
@@ -253,6 +254,38 @@ public class XLSX {
         }
 
         return valueBigDecimal;
+    }
+
+    /**
+     * Converte String, geralmente em arquivo ini para mapa de configuração de
+     * coluna.
+     *
+     *
+     * @param collumnName Nome da coluna
+     * @param iniString String com configuração separada por "¬" e definidos por
+     * "-" na frente de cada argumento.
+     * @return Mapa de configuração de coluna
+     */
+    public static Map<String, String> convertStringToConfig(String collumnName, String iniString) {
+        if (!"".equals(iniString) && iniString != null) {
+            Map<String, String> config = new HashMap<>();
+            String[] configs = iniString.split("¬", -1);
+
+            config.put("name", collumnName);
+            config.put("collumn", Args.get(configs, "collumn"));
+            config.put("regex", Args.get(configs, "regex"));
+            config.put("replace", Args.get(configs, "replace"));
+            config.put("type", Args.get(configs, "type"));
+            config.put("dateFormat", Args.get(configs, "dateFormat"));
+            config.put("required", Args.get(configs, "required"));
+            config.put("requiredBlank", Args.get(configs, "requiredBlank"));
+            config.put("unifyDown", Args.get(configs, "unifyDown"));
+            config.put("forceNegativeIf", Args.get(configs, "forceNegativeIf"));
+
+            return config;
+        } else {
+            return null;
+        }
     }
 
 }
