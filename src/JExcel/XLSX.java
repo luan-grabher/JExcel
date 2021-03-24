@@ -15,11 +15,44 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 public class XLSX {
 
     /**
+     * Converte um texto definindo as configurações da coluna da mesma forma que
+     * argumentos são definidos nos atalhos do Windows, usando "-" na frente e
+     * depois o valor, porém ao invés de separar com espaços a separação é com
+     * "¬".
+     * <br>
+     * Os argumentos são os mesmos do method "get" desta classe.
+     * 
+     * @param collumnName O nome da coluna
+     * @param iniString O texto com os argumentos declarados.
+     */
+    public static Map<String, String> getCollumnConfigFromString(String collumnName, String iniString) {
+        if (!"".equals(iniString) && iniString != null) {
+            Map<String, String> config = new HashMap<>();
+            String[] configs = iniString.split("¬", -1);
+
+            config.put("name", collumnName);
+            config.put("collumn", Args.get(configs, "collumn"));
+            config.put("regex", Args.get(configs, "regex"));
+            config.put("replace", Args.get(configs, "replace"));
+            config.put("type", Args.get(configs, "type"));
+            config.put("dateFormat", Args.get(configs, "dateFormat"));
+            config.put("required", Args.get(configs, "required"));
+            config.put("requiredBlank", Args.get(configs, "requiredBlank"));
+            config.put("unifyDown", Args.get(configs, "unifyDown"));
+            config.put("forceNegativeIf", Args.get(configs, "forceNegativeIf"));
+
+            return config;
+        } else {
+            return null;
+        }
+    }
+
+    /**
      * Retorna uma lista das linhas de um arquivo xlsx com um mapa com o valores
      * das colunas de cada linha conforme as configurações definidas.
      * <p>
-     * Para procurar um regex no meio de algo e ignorar case:
-     * "(?i).*" + search + ".*"<br>
+     * Para procurar um regex no meio de algo e ignorar case: "(?i).*" + search
+     * + ".*"<br>
      * <p>
      * Configurações de cada coluna:
      * <p>
