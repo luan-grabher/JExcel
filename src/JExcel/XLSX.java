@@ -1,6 +1,7 @@
 package JExcel;
 
 import fileManager.Args;
+import fileManager.CSV;
 import java.io.File;
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -21,7 +22,7 @@ public class XLSX {
      * "¬".
      * <br>
      * Os argumentos são os mesmos do method "get" desta classe.
-     * 
+     *
      * @param collumnName O nome da coluna
      * @param iniString O texto com os argumentos declarados.
      */
@@ -86,6 +87,13 @@ public class XLSX {
         List<Map<String, Object>> rows = new ArrayList<>();
 
         try {
+            /*Verifica CSV*/
+            if(file.getName().toLowerCase().endsWith(".csv")){
+                //Se for CSV converte para arquivo xslx
+                file = getCSV(file);
+            }
+            
+            
             XSSFWorkbook wk;
             XSSFSheet sheet;
 
@@ -321,4 +329,44 @@ public class XLSX {
         }
     }
 
+    /**
+     * Converte csv para xslx
+     *
+     * @param csv Arquivo csv
+     * @return Retorna Arquivo xslx salvo na mesma pasta do csv
+     */
+    public static File getCSV(File csv) {
+        //Get map from csv
+        List<Map<String, String>> map = CSV.getMap(csv);
+
+        XSSFWorkbook wk = new XSSFWorkbook();
+        XSSFSheet sheet = wk.createSheet("csv");
+
+        //Coloca cabeçalho
+        Row header = sheet.createRow(0);
+        Integer[] headersAdd = new Integer[]{-1};
+        map.get(0).forEach((col, val) -> {
+            headersAdd[0]++;
+            Cell cell = header.createCell(headersAdd[0]);
+            cell.setCellValue(col);
+        });
+
+        //Cria linhas
+        Integer[] rowsAdd = new Integer[]{0};
+        map.forEach((line) -> {
+            rowsAdd[0]++;
+            Row row = sheet.createRow(rowsAdd[0]);
+            
+            Integer[] colsAdd = new Integer[]{-1};
+            line.forEach((col, val) -> {
+                colsAdd[0]++;
+                Cell cell = row.createCell(colsAdd[0]);
+                cell.setCellValue(val);
+            });
+        });
+        
+        File xlsxFile = new File(csv.getParent() + "\\" + csv.getName().toLowerCase().replaceAll(".csv", ".xslx"));        
+        JExcel.saveWorkbookAs(xlsxFile, wk);
+        return xlsxFile;
+    }
 }
