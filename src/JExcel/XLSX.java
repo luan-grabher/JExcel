@@ -248,8 +248,11 @@ public class XLSX {
 
         for (String col : cols) {
             if (col.length() == 1 || (col.length() == 2 && col.startsWith("-"))) {
+                String prepend = "";
+                
                 if (col.length() == 2 && col.startsWith("-")) {
                     col = col.replaceAll("-", "");
+                    prepend = "-";
                 }
 
                 Cell cel = row.getCell(JExcel.Cell(col));
@@ -257,6 +260,7 @@ public class XLSX {
                     if (!result.toString().equals("")) {
                         result.append(" ");
                     }
+                    result.append(prepend);
                     result.append(JExcel.getStringCell(cel));
                 }
             } else if (col.length() > 1) {
@@ -291,7 +295,7 @@ public class XLSX {
 
         //Se a coluna tiver que multiplicar por -1 e o valor encontrado for maior que zero
         if (forceNegative && valueBigDecimal.compareTo(BigDecimal.ZERO) > 0) {
-            valueBigDecimal = valueBigDecimal.multiply(new BigDecimal("-1"));
+            valueBigDecimal = valueBigDecimal.negate();
         }
 
         return valueBigDecimal;
