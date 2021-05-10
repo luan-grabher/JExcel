@@ -163,15 +163,19 @@ public class JExcel {
 
     public static boolean isDateCell(Cell cell) {
         try {
-            if (DateUtil.isCellDateFormatted(cell) || (cell.getCellType() == CellType.STRING
-                    && (Dates.isDateInThisFormat(cell.getStringCellValue(), "dd/MM/yyyy")
-                    || Dates.isDateInThisFormat(cell.getStringCellValue(), "yyyy-MM-dd")))) {
+            if (DateUtil.isCellDateFormatted(cell)) {
                 return true;
             } else {
                 return false;
             }
         } catch (Exception e) {
-            return false;
+            if (cell.getCellType() == CellType.STRING
+                    && (Dates.isDateInThisFormat(cell.getStringCellValue(), "dd/MM/yyyy")
+                    || Dates.isDateInThisFormat(cell.getStringCellValue(), "yyyy-MM-dd"))) {
+                return true;
+            } else {
+                return false;
+            }
         }
     }
 
