@@ -1,5 +1,6 @@
 package JExcel;
 
+import Dates.Dates;
 import fileManager.FileManager;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -75,7 +76,7 @@ public class JExcel {
 
     public static String getStringCell(Cell cel) {
         try {
-            if(cel != null){
+            if (cel != null) {
                 String tipo = cel.getCellType().name();
 
                 switch (tipo) {
@@ -86,7 +87,7 @@ public class JExcel {
                     default:
                         return "";
                 }
-            }else{
+            } else {
                 throw new Exception("Célula inexistente ou sem nada");
             }
         } catch (Exception e) {
@@ -95,9 +96,10 @@ public class JExcel {
         }
 
     }
-    
-        /**
+
+    /**
      * Pega a String da célula
+     *
      * @param cel
      * @return String da célula
      */
@@ -161,7 +163,9 @@ public class JExcel {
 
     public static boolean isDateCell(Cell cell) {
         try {
-            if (DateUtil.isCellDateFormatted(cell)) {
+            if (DateUtil.isCellDateFormatted(cell) || (cell.getCellType() == CellType.STRING
+                    && (Dates.isDateInThisFormat(cell.getStringCellValue(), "dd/MM/yyyy")
+                    || Dates.isDateInThisFormat(cell.getStringCellValue(), "yyyy-MM-dd")))) {
                 return true;
             } else {
                 return false;
@@ -170,18 +174,17 @@ public class JExcel {
             return false;
         }
     }
-    
+
     public void setCellBorders(CellStyle style) {
         style.setBorderTop(BorderStyle.THIN);
         style.setBorderLeft(BorderStyle.THIN);
         style.setBorderRight(BorderStyle.THIN);
         style.setBorderBottom(BorderStyle.THIN);
     }
-    
-    
+
     /**
      * Pega bigdecimal de uma celula do excel numerica
-     * 
+     *
      * @param cell CElula que ira pegar numero
      * @param forceNegative Se deve multiplicar por -1 o numero se for positivo
      * @return celula em número BigDecimal
@@ -202,7 +205,7 @@ public class JExcel {
         if (forceNegative && valueBigDecimal.compareTo(BigDecimal.ZERO) > 0) {
             valueBigDecimal = valueBigDecimal.multiply(new BigDecimal("-1"));
         }
-        
+
         return valueBigDecimal;
     }
 }
