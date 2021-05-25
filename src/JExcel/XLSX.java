@@ -369,7 +369,7 @@ public class XLSX {
             });
         });
         
-        File xlsxFile = new File(csv.getParent() + "\\" + csv.getName().toLowerCase().replaceAll(".csv", ".xslx"));        
+        File xlsxFile = new File(csv.getParent() + "\\" + csv.getName().toLowerCase().replaceAll(".csv", ".xlsx"));        
         JExcel.saveWorkbookAs(xlsxFile, wk);
         return xlsxFile;
     }
