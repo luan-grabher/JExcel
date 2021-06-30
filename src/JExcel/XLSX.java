@@ -284,12 +284,15 @@ public class XLSX {
     private static BigDecimal getBigDecimalFromCell(String celString, boolean forceNegative) {
         //Pega texto das celulas
         String valueString = celString != null ? celString : "0.00";
-        valueString = valueString.replaceAll("[^0-9\\.,-]", "");
+        
+        try{
+            valueString = valueString.replaceAll("[^0-9E\\.,-]", "");
 
-        //Se tiver . antes da virgula remove os pontos e coloca ponto no lugar da virgula
-        if (valueString.indexOf(".") < valueString.indexOf(",")) {
-            valueString = valueString.replaceAll("\\.", "").replaceAll("\\,", ".");
-        }
+            //Se tiver . antes da virgula remove os pontos e coloca ponto no lugar da virgula
+            if (valueString.indexOf(".") < valueString.indexOf(",")) {
+                valueString = valueString.replaceAll("\\.", "").replaceAll("\\,", ".");
+            }
+        }catch(Exception e){}
 
         BigDecimal valueBigDecimal = new BigDecimal(valueString.equals("") ? "0" : valueString);
 
