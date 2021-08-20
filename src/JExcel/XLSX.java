@@ -88,12 +88,11 @@ public class XLSX {
 
         try {
             /*Verifica CSV*/
-            if(file.getName().toLowerCase().endsWith(".csv")){
+            if (file.getName().toLowerCase().endsWith(".csv")) {
                 //Se for CSV converte para arquivo xslx
                 file = getCSV(file);
             }
-            
-            
+
             XSSFWorkbook wk;
             XSSFSheet sheet;
 
@@ -107,49 +106,80 @@ public class XLSX {
                 while (c.values().remove(null));
             });
 
+            /*Variavel que permite a adição de colunas, por padrão define como true */
+            Boolean[] canAdd = new Boolean[]{true};
+            //Se tiver a configuração para filtro de start e end do get
+            if (config.containsKey("startGet")) {
+                //Define o canAdd para false
+                canAdd[0] = false;
+            }
+
             for (Row row : sheet) {
                 //Cria mapa de colunas
                 Map<String, Object> cols = new HashMap<>();
                 Boolean[] rowValid = new Boolean[]{true};
 
-                //Percorre todas colunas das configurações
-                config.forEach((name, col) -> {
-                    if (col != null) {
+                try {
+                    //Percorre todas colunas das configurações
+                    config.forEach((String name, Map<String, String> col) -> {
+                        /*Se o nome da configuração não for a que gerencia o inicio e finalização de gets, poder adicionar colunas ativo e tiver configuração de colunas, verifica as colunas*/
+                        if (col != null) {
 
-                        //Pega o objeto da coluna
-                        Object colObj = getCollumnVal(row, col);
+                            //Pega o objeto da coluna
+                            Object colObj = getCollumnVal(row, col);
+                                                        
+                            //Se o nome for startGet ou EndGet
+                            if("startGet".equals(name) || "endGet".equals(name)){
+                                //Se tiver conseguido pegar o valor da linha
+                                if(colObj != null && !"".equals(colObj)){
+                                    //Se for startGet, define o canAdd como true, se for o endGet, define o canAdd como false
+                                    canAdd[0] = "startGet".equals(name);
+                                    //Vai para a proxima linha
+                                    throw new Error(name);
+                                }
+                            }
 
-                        //Se for tipo string e tiver que juntar com a proxima linha
-                        if ("string".equals(col.getOrDefault("type", "string"))
-                                && !"".equals(col.getOrDefault("unifyDown", ""))) {
-                            //Pega o valor da proxima linha
-                            Object nextRowCol = getNextCollumnVal(sheet.getRow(row.getRowNum() + 1), col);
-                            //Se pelo menos um valor não for null
-                            if (colObj != null || nextRowCol != null) {
-                                //Tansforma os valores null em "" e junta os dois no colObj
-                                colObj = (String) (colObj == null ? "" : colObj.toString());
-                                colObj += (String) (colObj.toString().equals("") ? "" : " " + (nextRowCol == null ? "" : nextRowCol.toString()));
+                            //Se estiver perrmitido adicionar
+                            if(canAdd[0] && !"startGet".equals(name) && !"endGet".equals(name)){
+                                //Se for tipo string e tiver que juntar com a proxima linha
+                                if ("string".equals(col.getOrDefault("type", "string"))
+                                        && !"".equals(col.getOrDefault("unifyDown", ""))) {
+                                    //Pega o valor da proxima linha
+                                    Object nextRowCol = getNextCollumnVal(sheet.getRow(row.getRowNum() + 1), col);
+                                    //Se pelo menos um valor não for null
+                                    if (colObj != null || nextRowCol != null) {
+                                        //Tansforma os valores null em "" e junta os dois no colObj
+                                        colObj = (String) (colObj == null ? "" : colObj.toString());
+                                        colObj += (String) (colObj.toString().equals("") ? "" : " " + (nextRowCol == null ? "" : nextRowCol.toString()));
+                                    }
+                                }
+
+                                //Se for required e não for null OU se não for required
+                                if (Boolean.TRUE.equals(Boolean.valueOf(col.get("required")))
+                                        && (colObj == null || colObj.equals(""))) {
+                                    rowValid[0] = false;
+                                } else {
+                                    //Se não tiver que ser em branco o tiver que ser em branco e o objeto for null ou
+                                    if (Boolean.TRUE.equals(Boolean.valueOf(col.get("requiredBlank")))
+                                            && colObj != null && !colObj.equals("")) {
+                                        rowValid[0] = false;
+                                    } else {
+                                        cols.put(name, colObj);
+                                    }
+                                }
                             }
                         }
+                    });
 
-                        //Se for required e não for null OU se não for required
-                        if (Boolean.TRUE.equals(Boolean.valueOf(col.get("required")))
-                                && (colObj == null || colObj.equals(""))) {
-                            rowValid[0] = false;
-                        } else {
-                            //Se não tiver que ser em branco o tiver que ser em branco e o objeto for null ou
-                            if (Boolean.TRUE.equals(Boolean.valueOf(col.get("requiredBlank")))
-                                    && colObj != null && !colObj.equals("")) {
-                                rowValid[0] = false;
-                            } else {
-                                cols.put(name, colObj);
-                            }
-                        }
+                    if (rowValid[0] == true && cols.size() > 0) {
+                        rows.add(cols);
                     }
-                });
-
-                if (rowValid[0] == true && cols.size() > 0) {
-                    rows.add(cols);
+                } catch (Error e) {
+                    //Se o break for para dar end
+                    if(e.getMessage().equals("endGet")){
+                        //sai do loop pois já pegou tudo;
+                        break;
+                    }
                 }
             }
         } catch (Exception e) {
@@ -249,7 +279,7 @@ public class XLSX {
         for (String col : cols) {
             if (col.length() == 1 || (col.length() == 2 && col.startsWith("-"))) {
                 String prepend = "";
-                
+
                 if (col.length() == 2 && col.startsWith("-")) {
                     col = col.replaceAll("-", "");
                     prepend = "-";
@@ -284,15 +314,16 @@ public class XLSX {
     private static BigDecimal getBigDecimalFromCell(String celString, boolean forceNegative) {
         //Pega texto das celulas
         String valueString = celString != null ? celString : "0.00";
-        
-        try{
+
+        try {
             valueString = valueString.replaceAll("[^0-9E\\.,-]", "");
 
             //Se tiver . antes da virgula remove os pontos e coloca ponto no lugar da virgula
             if (valueString.indexOf(".") < valueString.indexOf(",")) {
                 valueString = valueString.replaceAll("\\.", "").replaceAll("\\,", ".");
             }
-        }catch(Exception e){}
+        } catch (Exception e) {
+        }
 
         BigDecimal valueBigDecimal = new BigDecimal(valueString.equals("") ? "0" : valueString);
 
@@ -363,7 +394,7 @@ public class XLSX {
         map.forEach((line) -> {
             rowsAdd[0]++;
             Row row = sheet.createRow(rowsAdd[0]);
-            
+
             Integer[] colsAdd = new Integer[]{-1};
             line.forEach((col, val) -> {
                 colsAdd[0]++;
@@ -371,8 +402,8 @@ public class XLSX {
                 cell.setCellValue(val);
             });
         });
-        
-        File xlsxFile = new File(csv.getParent() + "\\" + csv.getName().toLowerCase().replaceAll(".csv", ".xlsx"));        
+
+        File xlsxFile = new File(csv.getParent() + "\\" + csv.getName().toLowerCase().replaceAll(".csv", ".xlsx"));
         JExcel.saveWorkbookAs(xlsxFile, wk);
         return xlsxFile;
     }
