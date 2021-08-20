@@ -127,20 +127,19 @@ public class XLSX {
 
                             //Pega o objeto da coluna
                             Object colObj = getCollumnVal(row, col);
-                                                        
-                            //Se o nome for startGet ou EndGet
-                            if("startGet".equals(name) || "endGet".equals(name)){
-                                //Se tiver conseguido pegar o valor da linha
-                                if(colObj != null && !"".equals(colObj)){
-                                    //Se for startGet, define o canAdd como true, se for o endGet, define o canAdd como false
-                                    canAdd[0] = "startGet".equals(name);
-                                    //Vai para a proxima linha
-                                    throw new Error(name);
-                                }
+
+                            //Se o nome for não puder adicionar e for startGet ou puder adicionar e for EndGet e tiver pego o valor da coluna
+                            if (colObj != null
+                                    && ((!canAdd[0] && "startGet".equals(name))
+                                    || (canAdd[0] && "endGet".equals(name)))) {
+                                //Se for startGet, define o canAdd como true, se for o endGet, define o canAdd como false
+                                canAdd[0] = "startGet".equals(name);
+                                //Vai para a proxima linha
+                                throw new Error(name);
                             }
 
                             //Se estiver perrmitido adicionar
-                            if(canAdd[0] && !"startGet".equals(name) && !"endGet".equals(name)){
+                            if (canAdd[0] && !"startGet".equals(name) && !"endGet".equals(name)) {
                                 //Se for tipo string e tiver que juntar com a proxima linha
                                 if ("string".equals(col.getOrDefault("type", "string"))
                                         && !"".equals(col.getOrDefault("unifyDown", ""))) {
@@ -176,7 +175,7 @@ public class XLSX {
                     }
                 } catch (Error e) {
                     //Se o break for para dar end
-                    if(e.getMessage().equals("endGet")){
+                    if (e.getMessage().equals("endGet")) {
                         //sai do loop pois já pegou tudo;
                         break;
                     }
