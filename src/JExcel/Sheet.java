@@ -14,7 +14,7 @@ public class Sheet {
 
     public XSSFCell getRange(String rangeStr) {
         if (rangeStr.length() == 2 && rangeStr.matches("[a-zA-Z][0-9]+")) {
-            return getCell(Integer.valueOf(rangeStr.replaceAll("[^0-9]+", "")), JExcel.Cell(rangeStr.replaceAll("[0-9]+", "")));
+            return getCell(Integer.valueOf(rangeStr.replaceAll("[^0-9]+", "")) - 1, JExcel.Cell(rangeStr.replaceAll("[0-9]+", "")));
         } else {
             return getCell(0, 0);
         }
