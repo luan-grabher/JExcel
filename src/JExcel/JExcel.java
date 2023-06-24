@@ -88,7 +88,8 @@ public class JExcel {
                         return "";
                 }
             } else {
-                throw new Exception("Célula inexistente ou sem nada");
+                //throw new Exception("Célula inexistente ou sem nada");
+                return "";
             }
         } catch (Exception e) {
             e.printStackTrace();

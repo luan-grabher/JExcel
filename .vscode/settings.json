@@ -3,6 +3,8 @@
         "lib/**/*.jar",
         "e:\\Documents\\Projetos\\Moresco\\FileManager\\FileManager.jar",
         "e:\\Documents\\Projetos\\Moresco\\Dates\\Dates.jar",
-        "libs/**/*.jar"
+        "libs/**/*.jar",
+        "c:\\Users\\luan\\Documents\\Projetos\\Moresco\\FileManager\\FileManager.jar",
+        "c:\\Users\\luan\\Documents\\Projetos\\Moresco\\Dates\\Dates.jar"
     ]
 }
