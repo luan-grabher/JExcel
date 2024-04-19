@@ -112,13 +112,27 @@ public class JExcel {
                 case "STRING":
                     return cel.getStringCellValue();
                 case "NUMERIC":
-                    return String.valueOf(new BigDecimal(cel.getNumericCellValue()).toPlainString());
+                    double valorNumerico = cel.getNumericCellValue();                    
+                    
+                    return getStringFromDouble(valorNumerico);
                 default:
                     return "";
             }
         } catch (Exception e) {
             return "";
         }
+    }
+
+    public static String getStringFromDouble(double value) {
+        String valorNumerico = String.valueOf(value);
+
+        //remove todos zeros a direita após a virgula
+        valorNumerico = valorNumerico.replaceAll("\\.?0*$", "");
+
+        BigDecimal valorFixed = new BigDecimal(valorNumerico);
+        String valorComoTexto = valorFixed.toPlainString();
+
+        return valorComoTexto;
     }
 
     public static String getStringDate(int daysAfter1900) {

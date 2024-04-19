@@ -93,6 +93,11 @@ public class XLSX {
                 file = getCSV(file);
             }
 
+            /* Verifica XLS */
+            if (!file.getName().toLowerCase().endsWith(".xlsx")) {
+                return rows;
+            }
+
             XSSFWorkbook wk;
             XSSFSheet sheet;
 
@@ -122,55 +127,76 @@ public class XLSX {
                 try {
                     //Percorre todas colunas das configurações
                     config.forEach((String name, Map<String, String> col) -> {
-                        /*Se o nome da configuração não for a que gerencia o inicio e finalização de gets, poder adicionar colunas ativo e tiver configuração de colunas, verifica as colunas*/
-                        if (col != null) {
+                        Boolean isColunaNula = col == null;
+                        if (isColunaNula) {
+                            return;
+                        }
 
-                            //Pega o objeto da coluna
-                            Object colObj = getCollumnVal(row, col);
+                        Object colObj = getCollumnVal(row, col);
 
-                            //Se o nome for não puder adicionar e for startGet ou puder adicionar e for EndGet e tiver pego o valor da coluna
-                            if (colObj != null
-                                    && ((!canAdd[0] && "startGet".equals(name))
-                                    || (canAdd[0] && "endGet".equals(name)))) {
-                                //Se for startGet, define o canAdd como true, se for o endGet, define o canAdd como false
-                                canAdd[0] = "startGet".equals(name);
-                                //Vai para a proxima linha
-                                throw new Error(name);
-                            }
+                        Boolean isStartGet = "startGet".equals(name);
+                        Boolean isEndGet = "endGet".equals(name);
+                        Boolean isPermitidoAdicionar = canAdd[0];
 
-                            //Se estiver perrmitido adicionar
-                            if (canAdd[0] && !"startGet".equals(name) && !"endGet".equals(name)) {
-                                //Se for tipo string e tiver que juntar com a proxima linha
-                                if ("string".equals(col.getOrDefault("type", "string"))
-                                        && !"".equals(col.getOrDefault("unifyDown", ""))) {
-                                    //Pega o valor da proxima linha
-                                    Object nextRowCol = getNextCollumnVal(sheet.getRow(row.getRowNum() + 1), col);
-                                    //Se pelo menos um valor não for null
-                                    if (colObj != null || nextRowCol != null) {
-                                        //Tansforma os valores null em "" e junta os dois no colObj
-                                        colObj = (String) (colObj == null ? "" : colObj.toString());
-                                        colObj += (String) (colObj.toString().equals("") ? "" : " " + (nextRowCol == null ? "" : nextRowCol.toString()));
-                                    }
-                                }
 
-                                //Se for required e não for null OU se não for required
-                                if (Boolean.TRUE.equals(Boolean.valueOf(col.get("required")))
-                                        && (colObj == null || colObj.equals(""))) {
-                                    rowValid[0] = false;
-                                } else {
-                                    //Se não tiver que ser em branco o tiver que ser em branco e o objeto for null ou
-                                    if (Boolean.TRUE.equals(Boolean.valueOf(col.get("requiredBlank")))
-                                            && colObj != null && !colObj.equals("")) {
-                                        rowValid[0] = false;
-                                    } else {
-                                        cols.put(name, colObj);
-                                    }
-                                }
+                        //Se o nome for não puder adicionar e for startGet ou puder adicionar e for EndGet e tiver pego o valor da coluna
+                        if (colObj != null && ((!isPermitidoAdicionar && isStartGet) || (isPermitidoAdicionar && isEndGet))) {
+                            //Se for startGet, define o canAdd como true, se for o endGet, define o canAdd como false
+                            canAdd[0] = isStartGet;
+                            //Vai para a proxima linha
+                            throw new Error(name);
+                        }
+
+                        if (!isPermitidoAdicionar || isStartGet || isEndGet) {
+                            return;
+                        }
+
+                        String tipoDaColuna = col.getOrDefault("type", "string");
+                        String unirComLinhaDeBaixo = col.getOrDefault("unifyDown", "");
+
+                        Boolean isString = "string".equals(tipoDaColuna);
+                        Boolean isUnirComLinhaDeBaixo = !"".equals(unirComLinhaDeBaixo);
+
+                        //Se for tipo string e tiver que juntar com a proxima linha
+                        if (isString && isUnirComLinhaDeBaixo){
+                            Object valorProximaLinha = getNextCollumnVal(sheet.getRow(row.getRowNum() + 1), col);
+                            Boolean isPeloMenosUmDosValoresNaoEhNulo = colObj != null || valorProximaLinha != null;
+                            if (isPeloMenosUmDosValoresNaoEhNulo) {
+                                String valorColunaNormalizadoComoString = (String) (colObj == null ? "" : colObj.toString());
+                                String valorProximaLinhaNormalizadoComoString = (String) (valorProximaLinha == null ? "" : valorProximaLinha.toString());
+                                
+                                Boolean isAlgumDosTextosEmBranco = valorColunaNormalizadoComoString.equals("") || valorProximaLinhaNormalizadoComoString.equals("");
+                                String separadorTexto = isAlgumDosTextosEmBranco ? "" : " ";
+
+                                String textoUnido = valorColunaNormalizadoComoString + separadorTexto + valorProximaLinhaNormalizadoComoString;
+
+                                colObj = textoUnido;
                             }
                         }
+
+                        Boolean isColunaRequerida = Boolean.TRUE.equals(Boolean.valueOf(col.get("required")));
+                        Boolean isColunaRequeridaEmBranco = Boolean.TRUE.equals(Boolean.valueOf(col.get("requiredBlank")));
+
+                        Boolean isColunaEmBranco = colObj == null || colObj.equals("");
+
+                        if (isColunaRequerida && isColunaEmBranco) {
+                            rowValid[0] = false;
+                            return;
+                        }
+
+                        //Se não tiver que ser em branco o tiver que ser em branco e o objeto for null ou
+                        if (isColunaRequeridaEmBranco && !isColunaEmBranco) {
+                            rowValid[0] = false;
+                            return;
+                        }
+
+                        cols.put(name, colObj);                                                                 
                     });
 
-                    if (rowValid[0] == true && cols.size() > 0) {
+                    Boolean isExisteColunasParaAdicionar = cols.size() > 0;
+                    Boolean isLinhaValida = rowValid[0];
+
+                    if (isExisteColunasParaAdicionar && isLinhaValida) {
                         rows.add(cols);
                     }
                 } catch (Error e) {
@@ -216,53 +242,86 @@ public class XLSX {
      * @param nameMapCollumns nome do vetor que tem as colunas
      */
     private static Object getCollumnVal(Row row, Map<String, String> colConfig, String nameMapCollumns) {
+        String regexNumeroInteiro = "[0-9]+";
+        String regexNumeroDecimal = "[0-9]+[.][0-9]+";
 
         try {
-            String stringVal = getStringOfCols(row, colConfig.getOrDefault(nameMapCollumns, "").split("§"));
-            if (!stringVal.equals("")) {
-                //Converte data se for tipo data e estiver no formato de numero
-                if ("date".equals(colConfig.getOrDefault("type", "string"))
-                        && stringVal.matches("[0-9]+[.][0-9]+")) {
-                    Integer dateInt = Integer.valueOf(stringVal.split("\\.")[0]);
-                    stringVal = JExcel.getStringDate(dateInt);
-                } else if ("value".equals(colConfig.getOrDefault("type", "string"))
-                        && !stringVal.equals("")
-                        && !"".equals(colConfig.getOrDefault("forceNegativeIf", ""))) {
-                    if (stringVal.matches(colConfig.get("forceNegativeIf"))) {
-                        stringVal = "-" + stringVal;
-                    }
-                }
+            String textoDaColuna = getStringOfCols(row, colConfig.getOrDefault(nameMapCollumns, "").split("§"));
 
-                //Aplica replace se tiver replace e nao estiver em branco
-                if (!"".equals(colConfig.getOrDefault("replace", ""))) {
-                    String[] replaces = colConfig.get("replace").split("§", -1);
-                    if (replaces.length == 2) {
-                        stringVal = stringVal.replaceAll(replaces[0], replaces[1]);
-                    }
-                }
+            Boolean isTextoEmBranco = textoDaColuna.equals("");
+            if (isTextoEmBranco) {
+                return null;
+            }
 
-                //Continua se nao tiver filtro de regex ou for match do regex
-                if ("".equals(colConfig.getOrDefault("regex", ""))
-                        || (!"".equals(colConfig.getOrDefault("regex", ""))
-                        && stringVal.matches(colConfig.get("regex")))) {
-                    String type = colConfig.getOrDefault("type", "string");
-                    switch (type) {
-                        case "string":
-                            //Se for tipo string retorna string
-                            return stringVal;
-                        case "value":
-                            Boolean forceNegative = colConfig.get("collumn").startsWith("-");
-                            return getBigDecimalFromCell(stringVal, forceNegative);
-                        case "date":
-                            return Dates.Dates.getCalendarFromFormat(stringVal, colConfig.getOrDefault("dateFormat", "dd/MM/yyyy"));
-                        default:
-                            break;
+
+            String tipoDacoluna = colConfig.getOrDefault("type", "string");
+            Boolean isColunaData = "date".equals(tipoDacoluna);
+            Boolean isColunaValor = "value".equals(tipoDacoluna);
+            
+            
+            if (isColunaData){
+                Boolean isNumeroDecimal = textoDaColuna.matches(regexNumeroDecimal);
+                Boolean isNumeroInteiro = textoDaColuna.matches(regexNumeroInteiro);
+
+                Boolean isDataParaConversao = isNumeroDecimal || isNumeroInteiro;
+                if (isDataParaConversao) {
+                    Integer dateInt = Integer.valueOf(textoDaColuna.split("\\.")[0]);
+                    textoDaColuna = JExcel.getStringDate(dateInt);
+                }
+            } else if (isColunaValor) {
+                Boolean isTextoDaColunaEmBranco = textoDaColuna.equals("");
+                String condicaoParaTransformarEmNegativo = colConfig.getOrDefault("forceNegativeIf", "");
+                Boolean isDeveForcarNumeroComoNegativoNessaCondicao = !"".equals(condicaoParaTransformarEmNegativo);
+
+
+                if (!isTextoDaColunaEmBranco && isDeveForcarNumeroComoNegativoNessaCondicao) {
+                    Boolean isTextoDaColunaNessaCondicao = textoDaColuna.matches(condicaoParaTransformarEmNegativo);
+                    if (isTextoDaColunaNessaCondicao) {
+                        textoDaColuna = "-" + textoDaColuna;
                     }
                 }
             }
+
+            String regraDeSubstituicao = colConfig.getOrDefault("replace", "");
+            Boolean isPossuiRegraDeSubstituicao = !"".equals(regraDeSubstituicao);
+            if (isPossuiRegraDeSubstituicao) {
+                String[] substituicao = regraDeSubstituicao.split("§", -1);
+                Boolean isSubstituicaoValida = substituicao.length == 2;
+                if (isSubstituicaoValida) {
+                    String regexProcurado = substituicao[0];
+                    String textoNoLugarDoRegex = substituicao[1];
+                    textoDaColuna = textoDaColuna.replaceAll(regexProcurado, textoNoLugarDoRegex);
+                }
+            }
+
+            String filtroNecessario = colConfig.getOrDefault("regex", "");
+            Boolean isUsarFiltroNecessario = !"".equals(filtroNecessario);
+
+            if (isUsarFiltroNecessario) {
+                Boolean isTextoDaColunaNaoPassaNoFiltro = !textoDaColuna.matches(filtroNecessario);
+                if (isTextoDaColunaNaoPassaNoFiltro) {
+                    return null;
+                }
+            }
+
+
+            switch (tipoDacoluna) {
+                case "string":
+                    return textoDaColuna;
+                case "value":
+                    Boolean isDeveForcarNegativo = colConfig.get("collumn").startsWith("-");
+                    return getBigDecimalFromCell(textoDaColuna, isDeveForcarNegativo);
+                case "date":
+                    String formatoDaData = colConfig.getOrDefault("dateFormat", "dd/MM/yyyy");
+                    return Dates.Dates.getCalendarFromFormat(textoDaColuna, formatoDaData);
+                default:
+                    return null;
+            }
+            
+            
         } catch (Exception e) {
+            return null; 
         }
-        return null;
     }
 
     /**
@@ -273,34 +332,41 @@ public class XLSX {
      * @param cols Colunas a serem pegas ou textos a serem colocados
      */
     private static String getStringOfCols(Row row, String[] cols) {
-        StringBuilder result = new StringBuilder("");
+        StringBuilder textoDasColunasUnificado = new StringBuilder("");
 
         for (String col : cols) {
-            if (col.length() == 1 || (col.length() == 2 && col.startsWith("-"))) {
+            Boolean isPrimeiroTextoAdicionado = textoDasColunasUnificado.toString().equals("");
+
+            Boolean isApenasUmCaractere = col.length() == 1;
+            Boolean isColunaComTraco = col.startsWith("-") && col.length() == 2;
+            Boolean isPalavra = col.length() > 1;
+
+            if (isApenasUmCaractere || isColunaComTraco) {
                 String prepend = "";
 
-                if (col.length() == 2 && col.startsWith("-")) {
+                if (isColunaComTraco) {
                     col = col.replaceAll("-", "");
                     prepend = "-";
                 }
 
                 Cell cel = row.getCell(JExcel.Cell(col));
                 if (cel != null) {
-                    if (!result.toString().equals("")) {
-                        result.append(" ");
+ 
+                    if (!isPrimeiroTextoAdicionado) {
+                        textoDasColunasUnificado.append(" ");
                     }
-                    result.append(prepend);
-                    result.append(JExcel.getStringCell(cel));
+                    textoDasColunasUnificado.append(prepend);
+                    textoDasColunasUnificado.append(JExcel.getCellString(cel));
                 }
-            } else if (col.length() > 1) {
-                if (!result.toString().equals("")) {
-                    result.append(" ");
+            } else if (isPalavra) {
+                if (!isPrimeiroTextoAdicionado) {
+                    textoDasColunasUnificado.append(" ");
                 }
-                result.append(col);
+                textoDasColunasUnificado.append(col);
             }
         }
 
-        return result.toString();
+        return textoDasColunasUnificado.toString();
     }
 
     /**
